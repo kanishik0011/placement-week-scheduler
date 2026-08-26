@@ -1,7 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: "standalone"
-};
+const nextConfig = process.env.VERCEL ? {} : { output: "standalone" };
 
 export default nextConfig;
-
