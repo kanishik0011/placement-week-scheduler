@@ -31,6 +31,19 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def strip_vercel_api_prefix(request, call_next):
+    path = request.scope.get("path", "")
+    for prefix in ("/api/backend", "/svc/api"):
+        if path == prefix:
+            request.scope["path"] = "/"
+            break
+        if path.startswith(f"{prefix}/"):
+            request.scope["path"] = path[len(prefix) :]
+            break
+    return await call_next(request)
+
+
 class SeedRequest(BaseModel):
     seed: int = 42
 
