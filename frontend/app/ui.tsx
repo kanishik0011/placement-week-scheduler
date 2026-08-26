@@ -86,7 +86,13 @@ function useApiMutation<TBody, TResult>(path: string, onSuccess: () => Promise<u
 }
 
 export function Dashboard({ mode }: { mode: Mode }) {
-  const [tab, setTab] = useState(mode === "defense" ? "defense" : "overview");
+  const [tab, setTab] = useState(() => {
+    if (typeof window !== "undefined") {
+      const view = new URLSearchParams(window.location.search).get("view");
+      if (view) return view;
+    }
+    return mode === "defense" ? "defense" : "overview";
+  });
   const [search, setSearch] = useState("");
   const [lastReplan, setLastReplan] = useState<Replan | null>(null);
   const ops = useOps();
@@ -98,6 +104,11 @@ export function Dashboard({ mode }: { mode: Mode }) {
   const students = useQuery({ queryKey: ["students"], queryFn: () => api<Student[]>("/students") });
   const rooms = useQuery({ queryKey: ["rooms"], queryFn: () => api<Room[]>("/rooms") });
   const events = useQuery({ queryKey: ["events"], queryFn: () => api<Array<{ id: string; description: string; event_type: string }>>("/events") });
+  const latestReplan = useQuery({
+    queryKey: ["latestReplan"],
+    queryFn: () => api<Replan>("/replans/latest"),
+    retry: false
+  });
 
   const dataReady = summary.data && metrics.data && interviews.data && companies.data && students.data && rooms.data;
   const companyById = useMemo(() => new Map((companies.data ?? []).map((c) => [c.id, c])), [companies.data]);
@@ -266,18 +277,18 @@ export function Dashboard({ mode }: { mode: Mode }) {
               {tab === "replan" && (
                 <Card>
                   <h2 className="font-bold">Replan Change Summary</h2>
-                  {!lastReplan && <p className="mt-3 text-sm text-slate-600">Run Replan to see a before/after diff.</p>}
-                  {lastReplan && (
+                  {!(lastReplan ?? latestReplan.data) && <p className="mt-3 text-sm text-slate-600">Run Replan to see a before/after diff.</p>}
+                  {(lastReplan ?? latestReplan.data) && (
                     <>
                       <div className="mt-3 rounded-md border border-line bg-surface p-3 text-sm text-slate-700">
-                        <span className="font-semibold text-ink">Disruption:</span> {String(lastReplan.summary.disruption_description)}
+                        <span className="font-semibold text-ink">Disruption:</span> {String((lastReplan ?? latestReplan.data)?.summary.disruption_description)}
                       </div>
                       <div className="mt-3 grid grid-cols-2 gap-3 xl:grid-cols-5">
                         <div className="rounded-md border border-line p-3">
                           <div className="text-xs uppercase text-slate-500">Validation</div>
-                          <div className={cx("font-bold", lastReplan.validation.valid ? "text-ok" : "text-danger")}>{lastReplan.validation.valid ? "Valid" : `${lastReplan.validation.violation_count} issues`}</div>
+                          <div className={cx("font-bold", (lastReplan ?? latestReplan.data)?.validation.valid ? "text-ok" : "text-danger")}>{(lastReplan ?? latestReplan.data)?.validation.valid ? "Valid" : `${(lastReplan ?? latestReplan.data)?.validation.violation_count} issues`}</div>
                         </div>
-                        {Object.entries(lastReplan.summary)
+                        {Object.entries((lastReplan ?? latestReplan.data)?.summary ?? {})
                           .filter(([k]) => k !== "disruption_description")
                           .slice(0, 10)
                           .map(([k, v]) => (
@@ -287,7 +298,7 @@ export function Dashboard({ mode }: { mode: Mode }) {
                             </div>
                           ))}
                       </div>
-                      <table className="mt-4 w-full text-left text-sm"><thead><tr className="border-b"><th>Change</th><th>Interview</th><th>Old</th><th>New</th><th>Shift</th></tr></thead><tbody>{lastReplan.changes.filter((c) => c.classification !== "unchanged").slice(0, 120).map((c) => <tr key={String(c.interview_id)} className="border-b border-slate-100"><td className="py-2 font-semibold">{String(c.classification)}</td><td>{String(c.interview_id)}</td><td>{String(c.old_start ?? "-")} {String(c.old_room ?? "")}</td><td>{String(c.new_start ?? "-")} {String(c.new_room ?? "")}</td><td>{String(c.shift_minutes)}</td></tr>)}</tbody></table>
+                      <table className="mt-4 w-full text-left text-sm"><thead><tr className="border-b"><th>Change</th><th>Interview</th><th>Old</th><th>New</th><th>Shift</th></tr></thead><tbody>{((lastReplan ?? latestReplan.data)?.changes ?? []).filter((c) => c.classification !== "unchanged").slice(0, 120).map((c) => <tr key={String(c.interview_id)} className="border-b border-slate-100"><td className="py-2 font-semibold">{String(c.classification)}</td><td>{String(c.interview_id)}</td><td>{String(c.old_start ?? "-")} {String(c.old_room ?? "")}</td><td>{String(c.new_start ?? "-")} {String(c.new_room ?? "")}</td><td>{String(c.shift_minutes)}</td></tr>)}</tbody></table>
                     </>
                   )}
                 </Card>

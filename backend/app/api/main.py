@@ -23,6 +23,7 @@ app = FastAPI(title="Placement Week Scheduler API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -190,6 +191,14 @@ def replan() -> dict[str, Any]:
     return {"id": replan_id, **result}
 
 
+@app.get("/replans/latest")
+def latest_replan() -> dict[str, Any]:
+    result = store.load_latest_replan()
+    if result is None:
+        raise HTTPException(status_code=404, detail="No replan has been run")
+    return result
+
+
 @app.get("/replans/{replan_id}")
 def get_replan(replan_id: int) -> dict[str, Any]:
     try:
@@ -207,4 +216,3 @@ def get_replan_diff(replan_id: int) -> dict[str, Any]:
 @app.get("/events")
 def events() -> list[dict[str, Any]]:
     return [e.__dict__ for e in store.load().events[-50:]]
-

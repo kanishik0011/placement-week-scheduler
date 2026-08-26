@@ -49,6 +49,46 @@ Hard resource and safety constraints never bend. Business priorities are configu
 
 The generator uses branch-weighted cohorts, CGPA centered around 7-8 with a smaller high-CGPA tail, correlated shortlist probabilities, realistic company categories, tiered CGPA cutoffs, non-uniform panel counts, different durations, and high-pressure Day-1 overlaps.
 
+## Frontend screenshots
+
+The dashboard is intentionally dense and operations-focused for a placement coordinator working under live pressure.
+
+### Overview
+
+![Overview dashboard](docs/screenshots/overview.png)
+
+### Timeline
+
+![Timeline schedule view](docs/screenshots/timeline.png)
+
+### Rooms
+
+![Rooms view](docs/screenshots/rooms.png)
+
+### Companies
+
+![Companies view](docs/screenshots/companies.png)
+
+### Students
+
+![Students view](docs/screenshots/students.png)
+
+### Conflicts / Unscheduled
+
+![Unscheduled interviews view](docs/screenshots/unscheduled.png)
+
+### Disruption Center
+
+![Disruption center](docs/screenshots/disruptions.png)
+
+### Defense Mode
+
+![Defense mode](docs/screenshots/defense.png)
+
+### Replan Diff
+
+![Replan change summary](docs/screenshots/replan.png)
+
 ## Running locally
 
 Backend:

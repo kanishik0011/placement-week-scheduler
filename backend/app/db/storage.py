@@ -55,3 +55,11 @@ class StateStore:
             raise KeyError(replan_id)
         return json.loads(row[0])
 
+    def load_latest_replan(self) -> dict | None:
+        with self._conn() as conn:
+            row = conn.execute("select id, payload from replans order by id desc limit 1").fetchone()
+        if not row:
+            return None
+        payload = json.loads(row[1])
+        payload["id"] = row[0]
+        return payload
