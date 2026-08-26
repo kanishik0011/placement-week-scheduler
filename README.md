@@ -119,6 +119,23 @@ Docker Compose:
 docker compose up --build
 ```
 
+## Deploying on Vercel
+
+This repository is ready for Vercel Services with the repository root selected as the Vercel root directory. The root `vercel.json` defines:
+
+- `frontend/` as the Next.js service
+- `backend/` as the FastAPI service
+- `/api/backend/:path*` as the backend route
+- `/` as the frontend route
+
+Vercel automatically provides `NEXT_PUBLIC_BACKEND_URL` for the frontend service. Locally, the frontend falls back to `NEXT_PUBLIC_API_BASE` or `http://127.0.0.1:8000`.
+
+The FastAPI Vercel entrypoint is:
+
+```text
+backend/main.py -> app.api.main:app
+```
+
 ## Running tests
 
 ```bash

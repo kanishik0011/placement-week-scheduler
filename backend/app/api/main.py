@@ -17,7 +17,8 @@ from app.scheduler.validator import validate_schedule
 from app.services import disruptions
 from app.time_utils import at
 
-DB_PATH = Path(os.getenv("PLACEMENT_DB", "data/placement_scheduler.sqlite3"))
+DEFAULT_DB_PATH = "/tmp/placement_scheduler.sqlite3" if os.getenv("VERCEL") else "data/placement_scheduler.sqlite3"
+DB_PATH = Path(os.getenv("PLACEMENT_DB", DEFAULT_DB_PATH))
 store = StateStore(DB_PATH)
 app = FastAPI(title="Placement Week Scheduler API", version="1.0.0")
 app.add_middleware(
