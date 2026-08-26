@@ -2,7 +2,9 @@
   "services": {
     "frontend": {
       "root": "frontend/",
-      "framework": "nextjs"
+      "framework": "nextjs",
+      "buildCommand": "npm run build",
+      "outputDirectory": ".next"
     },
     "backend": {
       "root": "backend/",
@@ -25,4 +27,3 @@
     }
   ]
 }
-
